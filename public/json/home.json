@@ -1,0 +1,124 @@
+{
+    "nav": {
+        "logoTitle": "Nutrition Education Hub",
+        "navList": 
+            [
+           {
+             "name":"Home",
+            "url":"/PublicHealth"
+           },
+           {
+             "name":"Nutrition Education",
+             "url":""
+           },
+           {
+             "name":"Recipes",
+            "url":""
+           },
+           {
+             "name":"Events",
+            "url":""
+           },
+           {
+             "name":"About US",
+            "url":""
+           }
+        ]
+    },
+    "banner": {
+        "bannerTitle": "Empowering Health Through Nutrition Education",
+        "bannerDes": "Discover comprehensive resources and expert guidance to promote better health outcomes through informed nutritional choices.",
+        "bannerBtnName": " Get Started "
+    },
+    "EducationalResources": {
+        "title": "Educational Resources",
+        "des": "Explore our curated collection of nutrition education materials designed to help you make informed dietary choices.",
+        "categories": [
+            {
+                "id":1,
+                "title": "Healthy Eating Basics",
+                "description": "Learn fundamental principles of balanced nutrition and dietary guidelines.",
+                "image": "/img/1.jpg",
+                "Key":[
+                    "Apply practical strategies to integrate into daily life",
+                    "Identify common misconceptions about the topic",
+                    "Access additional tools for further learning"
+                ],
+                "Tags":[
+                    "Health Educators",
+                    "Parents",
+                    "Students",
+                    "Community Workers"
+                ]
+            },
+            {
+                "id":2,
+                "title": "Nutrition & Mental Health",
+                "description": "Explore the connection between diet and psychological well-being.",
+                "image": "/img/2.jpg",
+                   "Key":[
+                    "Apply practical strategies to integrate into daily life",
+                    "Identify common misconceptions about the topic",
+                    "Access additional tools for further learning"
+                ],
+                "Tags":[
+                    "Health Educators",
+                    "Parents",
+                    "Students",
+                    "Community Workers"
+                ]
+            },
+            {
+                "id":3,
+                "title": "Nutrition for Vulnerable Groups",
+                "description": "Specialized dietary guidance for different population segments.",
+                "image": "/img/3.jpg",
+                   "Key":[
+                    "Apply practical strategies to integrate into daily life",
+                    "Identify common misconceptions about the topic",
+                    "Access additional tools for further learning"
+                ],
+                "Tags":[
+                    "Health Educators",
+                    "Parents",
+                    "Students",
+                    "Community Workers"
+                ]
+            },
+            {
+                "id":4,
+                "title": "Cultural and Community Nutrition",
+                "description": "Understanding diverse dietary practices and community health.",
+                "image": "/img/4.jpg",
+                   "Key":[
+                    "Apply practical strategies to integrate into daily life",
+                    "Identify common misconceptions about the topic",
+                    "Access additional tools for further learning"
+                ],
+                "Tags":[
+                    "Health Educators",
+                    "Parents",
+                    "Students",
+                    "Community Workers"
+                ]
+            },
+            {
+                "id":5,
+                "title": "School Nutrition Programs",
+                "description": "Resources for implementing healthy eating in educational settings.",
+                "image": "/img/5.jpg",
+                   "Key":[
+                    "Apply practical strategies to integrate into daily life",
+                    "Identify common misconceptions about the topic",
+                    "Access additional tools for further learning"
+                ],
+                "Tags":[
+                    "Health Educators",
+                    "Parents",
+                    "Students",
+                    "Community Workers"
+                ]
+            }
+        ]
+    }
+}

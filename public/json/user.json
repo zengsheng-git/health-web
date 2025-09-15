@@ -1,0 +1,16 @@
+[
+    {
+        "email":"123456@gmail.com",
+        "role":"admin",
+        "password":"123456",
+        "GivenName":"AA",
+        "FamilyName":"BB"
+    },
+    {
+        "email":"223344@gmail.com",
+        "role":"user",
+        "password":"123456",
+        "GivenName":"CC",
+        "FamilyName":"DD"
+    }
+]
