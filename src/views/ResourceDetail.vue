@@ -170,12 +170,13 @@
                                       </div>
                                        
                                         <div>
+                                            <!-- 只显示当前用户创建的评论的删除按钮 -->
                                             <button
-                                                v-if="currentUserName==comment.userName" 
+                                                v-if="comment.email === currentUserEmail"
                                                 @click="confirmDelete(comment.id)"
-                                                class="px-3 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
+                                                class="text-red-500 hover:text-red-700 text-sm transition-colors"
                                             >
-                                              <i class="fas fa-trash mr-1"></i>Delete
+                                                Delete
                                             </button>
                                         </div>
                                     </div>
@@ -205,28 +206,31 @@
   import axios from 'axios';
   import { useConfirm } from "primevue/useconfirm";
   import { useToast } from 'primevue/usetoast';
+  import { db } from '@/common/firebase';
+  import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 
   const toast = useToast();
   const confirm = useConfirm();
 
-  // ---------------------- 1. Axios instance for Koa backend ----------------------
-  // Base URL of the Koa backend API
-  const API_BASE_URL = 'http://localhost:3000/api';
-  // Axios instance
-  const api = axios.create({
-    baseURL: API_BASE_URL,
-    timeout: 5000 // 5 seconds timeout
-  });
+  // ---------------------- Firestore 配置 ----------------------
+  const commentsDocRef = doc(db, 'comments', 'data');
   
   // ---------------------- 2. User login state ----------------------
   const isLogin = computed(() => {
     const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
-    return userInfo?.GivenName?.length > 0;
+    const name = userInfo?.displayName || userInfo?.GivenName || '';
+    return typeof name === 'string' && name.length > 0;
   });
   
   const currentUserName = computed(() => {
     const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
-    return userInfo?.GivenName || 'Guest';
+    return userInfo?.displayName || userInfo?.GivenName || userInfo?.email || 'Guest';
+  });
+  
+  // 获取当前用户的email
+  const currentUserEmail = computed(() => {
+    const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
+    return userInfo?.email || '';
   });
   
   // ---------------------- 3. Product detail logic ----------------------
@@ -280,12 +284,14 @@
   
   // Comment data structure (consistent with Koa backend return fields)
   interface CommentType {
-    id: string;          
-    userName: string;    
-    content: string;     
-    timestamp: number;   
-    edited?: boolean;   
+    id: string;
+    userName: string;
+    content: string;
+    timestamp: number;
+    edited?: boolean;
     lastEditTime?: number;
+    RatingVal: number;
+    email: string;
   }
   
   //Responsive data
@@ -297,17 +303,15 @@
   const submitError = ref('');  
   const RatingVal = ref(null);  
   
-  //Get the reviews of the current product from the background
+  // 从 Firestore 读取当前资源的评论
   const fetchComments = async () => {
     isCommentLoading.value = true;
     commentError.value = '';
     try {
-      const { data } = await api.get(`/comments/${resourceIndex.value}`);
-      if (data.success) {
-        comments.value = data.data.sort((a: CommentType, b: CommentType) => b.timestamp - a.timestamp);
-      } else {
-        throw new Error(data.message || 'Failed to fetch comments');
-      }
+      const snap = await getDoc(commentsDocRef);
+      const data = snap.exists() ? (snap.data() as Record<string, CommentType[]>) : {};
+      const arr = (data[String(resourceIndex.value)] || []) as CommentType[];
+      comments.value = [...arr].sort((a, b) => b.timestamp - a.timestamp);
     } catch (error: any) {
       commentError.value = error.message || 'Failed to load comments. Please try again later.';
       console.error('Comment fetch error:', error);
@@ -316,33 +320,33 @@
     }
   };
   
-  //Submit a new comment to the Koa backend
+  // 向 Firestore 提交新评论
   const submitComment = async () => {
     const content = newCommentContent.value.trim();
-    // console.log(RatingVal.value)
-    if (!content) return;
+    if (!content || RatingVal.value == null) return;
   
     isSubmitting.value = true;
     submitError.value = '';
     try {
-      //
-      const { data } = await api.post(`/comments/${resourceIndex.value}`, {
-        userName: currentUserName.value, 
-        content: content,
-        RatingVal: RatingVal.value     
-      });
+      const newItem: CommentType = {
+        id: (globalThis.crypto && 'randomUUID' in globalThis.crypto) ? globalThis.crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2),
+        timestamp: Date.now(),
+        edited: false,
+        userName: currentUserName.value,
+        content,
+        RatingVal: Number(RatingVal.value),
+        email: currentUserEmail.value
+      };
+      const fieldKey = String(resourceIndex.value);
+      await setDoc(commentsDocRef, { [fieldKey]: arrayUnion(newItem) }, { merge: true });
   
-      if (data.success) {
-        comments.value.unshift(data.data);
-        newCommentContent.value = '';
-        RatingVal.value=null
-        setTimeout(() => {
-          const firstComment = document.querySelector('.space-y-8 > div:first-child');
-          firstComment?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      } else {
-        throw new Error(data.message || 'Failed to post comment');
-      }
+      comments.value.unshift(newItem);
+      newCommentContent.value = '';
+      RatingVal.value = null;
+      setTimeout(() => {
+        const firstComment = document.querySelector('.space-y-8 > div:first-child') as HTMLElement | null;
+        firstComment?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     } catch (error: any) {
       submitError.value = error.message || 'Failed to post comment. Please try again later.';
       console.error('Comment submit error:', error);
@@ -408,24 +412,34 @@
       };
 
     const deleteComment = async (commentId) => {
-          try {
-            // Call the backend API to delete the comment
-            const res = await axios.delete(
-              `http://localhost:3000/api/comments/${resourceIndex.value}/${commentId}`
-            );
-        
-            if (res.data.success) {
-              // Remove the comment from the local list
-              comments.value = comments.value.filter(comment => comment.id !== commentId);
-              toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Comment deleted successfully', life: 3000 });
-            } else {
-              throw new Error(res.data.message || 'Failed to delete comment');
-            }
-          } catch (error) {
-            console.error('Failed to delete comment:', error);
-            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Failed to delete comment', life: 3000 });
-          }
-  };
+      try {
+        // 本地二次校验：仅允许删除自己发布的评论
+        const target = comments.value.find(c => c && c.id === commentId);
+        if (!target) {
+          toast.add({ severity: 'info', summary: 'Tips', detail: 'Comment not found', life: 3000 });
+          return;
+        }
+        if (target.email !== currentUserEmail.value) {
+          toast.add({ severity: 'warn', summary: 'Tips', detail: 'You can only delete your own comment', life: 3000 });
+          return;
+        }
+
+        // Firestore 删除：读-改-写当前资源的评论数组
+        const snap = await getDoc(commentsDocRef);
+        const data = snap.exists() ? (snap.data() as Record<string, CommentType[]>) : {};
+        const key = String(resourceIndex.value);
+        const arr = (data[key] || []) as CommentType[];
+        const newArr = arr.filter(c => c && c.id !== commentId);
+        await setDoc(commentsDocRef, { [key]: newArr }, { merge: true });
+
+        // 本地状态同步
+        comments.value = comments.value.filter(comment => comment.id !== commentId);
+        toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Comment deleted successfully', life: 3000 });
+      } catch (error) {
+        console.error('Failed to delete comment:', error);
+        toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Failed to delete comment', life: 3000 });
+      }
+    };
 
   //Initial loading 
   onMounted(async () => {

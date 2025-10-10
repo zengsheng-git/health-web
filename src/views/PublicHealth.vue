@@ -60,6 +60,8 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
 import axios from "axios";
+import { db } from '@/common/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 const router = useRouter();
 
 import { ref, onMounted, onUnmounted, computed } from 'vue';
@@ -80,19 +82,18 @@ onMounted(async ()=>{
   homeInfo.value =data;
   console.log(data)
 
-  const {data:allComments} = await axios('http://localhost:3000/api/comments');
-  console.log(allComments);
-
-  for(let item of  data.EducationalResources.categories){
-    let RatingValAll=0;
-    let cont=0
-    for(let el of allComments.data){
-        if(item.id==el.productId){
-            RatingValAll=RatingValAll+el.RatingVal;
-            cont=cont+1
-        }
+  // 从 Firestore 读取所有评论映射，计算各资源平均评分
+  try {
+    const snap = await getDoc(doc(db, 'comments', 'data'));
+    const allMap = snap.exists() ? (snap.data() as Record<string, Array<{ RatingVal: number }>>) : {};
+    for (let item of data.EducationalResources.categories) {
+      const arr = (allMap[String(item.id)] || []) as Array<{ RatingVal: number }>;
+      const sum = arr.reduce((s, el) => s + Number(el.RatingVal || 0), 0);
+      const avg = arr.length ? sum / arr.length : 0;
+      item.RatingValAll = Number.isFinite(avg) ? avg : 0;
     }
-    item.RatingValAll= isNaN(RatingValAll / cont) ? 0 : RatingValAll / cont
+  } catch (e) {
+    console.error('Failed to compute ratings from Firestore:', e);
   }
 })
 

@@ -152,6 +152,8 @@
   import axios from 'axios';
   import { useConfirm } from "primevue/useconfirm";
   import { useToast } from 'primevue/usetoast';
+  import { db } from '@/common/firebase';
+  import { doc, getDoc, setDoc } from 'firebase/firestore';
 
   const toast = useToast();
   const confirm = useConfirm();
@@ -186,12 +188,7 @@
     try {
       isLoading.value = true;
       // Parallel requests for product info and comments
-      const [productRes, commentsRes] = await Promise.all([
-        // Load product info (from home.json for consistency with frontend data)
-        axios.get('/json/home.json'),
-        // Load comments from Koa backend
-        axios.get(`http://localhost:3000/api/comments/${productId.value}`)
-      ]);
+      const productRes = await axios.get('/json/home.json');
   
       // Find the product by ID
       const allProducts = productRes.data.EducationalResources.categories.map((item, idx) => ({
@@ -206,11 +203,14 @@
         throw new Error('No product information found');
       }
   
-      // Load comments
-      if (commentsRes.data.success) {
-        comments.value = commentsRes.data.data;
-      } else {
-        throw new Error(commentsRes.data.message || 'Failed to load comments');
+      // Load comments from Firestore
+      try {
+        const snap = await getDoc(doc(db, 'comments', 'data'));
+        const map = snap.exists() ? (snap.data() || {}) : {};
+        const list = map[String(productId.value)];
+        comments.value = Array.isArray(list) ? list : [];
+      } catch (e) {
+        throw new Error('Failed to load comments from Firestore');
       }
   
       errorMsg.value = '';
@@ -239,26 +239,31 @@
   
   // 6. Comment operation: Save edited comment
   const saveEditedComment = async () => {
-    console.log(editCommentContent)
     if (!editCommentContent.value.trim()) return;
     try {
       isSaving.value = true;
-      // Call Koa backend API to save edited comment
-      const res = await axios.put(
-        `http://localhost:3000/api/comments/${productId.value}/${currentEditCommentId.value}`,
-        { content: editCommentContent.value.trim() }
-      );
-  
-      if (res.data.success) {
-        // Update comment in frontend
-        const updatedComment = res.data.data;
-        comments.value = comments.value.map(comment => 
-          comment.id === currentEditCommentId.value ? updatedComment : comment
-        );
-        closeEditModal(); // Close modal
-      } else {
-        throw new Error(res.data.message || 'Failed to save comment');
-      }
+      // Read current list
+      const ref = doc(db, 'comments', 'data');
+      const snap = await getDoc(ref);
+      const map = snap.exists() ? (snap.data() || {}) : {};
+      const key = String(productId.value);
+      const list = Array.isArray(map[key]) ? map[key] : [];
+      // Update target comment
+      const updatedList = list.map((c) => {
+        if (c && c.id === currentEditCommentId.value) {
+          return {
+            ...c,
+            content: editCommentContent.value.trim(),
+            edited: true,
+            lastEditTime: Date.now()
+          };
+        }
+        return c;
+      });
+      await setDoc(ref, { [key]: updatedList }, { merge: true });
+      // Update local
+      comments.value = updatedList;
+      closeEditModal();
     } catch (error) {
       console.error('Failed to save comment:', error);
       toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Failed to edit comment', life: 3000 });
@@ -295,18 +300,15 @@
   // 8. Comment operation: Delete comment
   const deleteComment = async (commentId) => {
     try {
-      // Call the backend API to delete the comment
-      const res = await axios.delete(
-        `http://localhost:3000/api/comments/${productId.value}/${commentId}`
-      );
-  
-      if (res.data.success) {
-        // Remove the comment from the local list
-        comments.value = comments.value.filter(comment => comment.id !== commentId);
-        toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Comment deleted successfully', life: 3000 });
-      } else {
-        throw new Error(res.data.message || 'Failed to delete comment');
-      }
+      const ref = doc(db, 'comments', 'data');
+      const snap = await getDoc(ref);
+      const map = snap.exists() ? (snap.data() || {}) : {};
+      const key = String(productId.value);
+      const list = Array.isArray(map[key]) ? map[key] : [];
+      const newList = list.filter((c) => c && c.id !== commentId);
+      await setDoc(ref, { [key]: newList }, { merge: true });
+      comments.value = comments.value.filter(comment => comment.id !== commentId);
+      toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Comment deleted successfully', life: 3000 });
     } catch (error) {
       console.error('Failed to delete comment', error);
       toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Failed to delete comment', life: 3000 });

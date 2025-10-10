@@ -49,6 +49,8 @@
   import { ref, onMounted } from 'vue';
   import { RouterLink } from 'vue-router';
   import axios from 'axios';
+import { db } from '@/common/firebase';
+import { doc, getDoc } from 'firebase/firestore';
   
   // Product list data
   const productList = ref([]);
@@ -69,18 +71,19 @@
       }));
       console.log(productList.value);
 
-      const {data:allComments} = await axios('http://localhost:3000/api/comments');
-      console.log(allComments);
-      for(let item of  productList.value){
-        let RatingValAll=0;
-        let cont=0
-        for(let el of allComments.data){
-            if(item.id==el.productId){
-                RatingValAll=RatingValAll+el.RatingVal;
-                cont=cont+1
-            }
+      // 从 Firestore 读取所有评论映射，计算各产品平均评分
+      try {
+        const snap = await getDoc(doc(db, 'comments', 'data'));
+        const dataMap = snap.exists() ? (snap.data() || {}) : {};
+        for (let item of productList.value) {
+          const list = dataMap[String(item.id)];
+          const arr = Array.isArray(list) ? list : [];
+          const sum = arr.reduce((s, el) => s + Number((el && el.RatingVal) || 0), 0);
+          const avg = arr.length ? sum / arr.length : 0;
+          item.RatingValAll = Number.isFinite(avg) ? avg : 0;
         }
-        item.RatingValAll= isNaN(RatingValAll / cont) ? 0 : RatingValAll / cont
+      } catch (e) {
+        console.error('Failed to compute ratings from Firestore:', e);
       }
 
       errorMsg.value = '';
