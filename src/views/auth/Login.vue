@@ -46,23 +46,20 @@ import AnthLayout from './anthLayout.vue';
 import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import { isEmail } from '@/common/util';
-import axios from 'axios';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/common/firebase';
 import { useToast } from 'primevue/usetoast';
 
 const toast = useToast();
 const router = useRouter();
-const userAllList = ref([]);
+
 
 const initialValues = ref({
     email: '',
     password: ''
 });
 
-onMounted(async () => {
-    const { data } = await axios.get('/json/user.json');
-    console.log(data);
-    userAllList.value = data;
-});
+
 
 const resolver = ({ values }) => {
     // console.log(values);
@@ -87,33 +84,32 @@ const resolver = ({ values }) => {
 };
 
 const onFormSubmit = async (data) => {
-    // console.log(valid)
-    console.log(data);
-    console.log(initialValues.value);
+    if (!data.valid) return;
 
-    if (!data.valid) {
-        return;
-    }
-
-    console.log('ok');
     try {
         const { email, password } = initialValues.value;
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-        const filterUser = userAllList.value.filter((item) => item.email == email);
-        console.log(filterUser)
+        // 兼容现有逻辑：存储到 localStorage
+        const userPayload = {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || '',
+        };
+        localStorage.setItem('user', JSON.stringify(userPayload));
 
-        if (filterUser.length) {
-            if (filterUser[0].password == password) {
-                router.push('/PublicHealth');
-                localStorage.setItem('user',JSON.stringify(filterUser[0]))
-            } else {
-                toast.add({ severity: 'warn', summary: 'Tips', detail: 'Incorrect password', life: 3000 });
-            }
-        } else {
-            toast.add({ severity: 'warn', summary: 'Tips', detail: 'The email address does not exist.', life: 3000 });
-        }
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Login successful', life: 2000 });
+        router.push('/PublicHealth');
     } catch (err) {
-        console.log(err);
+        console.error(err);
+        let detail = 'Login failed';
+        if (err?.code === 'auth/invalid-credential' || err?.code === 'auth/wrong-password') {
+            detail = 'Incorrect email or password';
+        } else if (err?.code === 'auth/user-not-found') {
+            detail = 'The email address does not exist';
+        }
+        toast.add({ severity: 'warn', summary: 'Tips', detail, life: 3000 });
     }
 };
 </script>

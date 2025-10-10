@@ -81,9 +81,13 @@
 import { useRouter } from "vue-router";
 import AnthLayout from "./anthLayout.vue";
 import { ref } from "vue";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "@/common/firebase";
+import { useToast } from "primevue/usetoast";
 import { isEmail } from "@/common/util";
 import { RouterLink } from "vue-router";
 const router = useRouter();
+const toast = useToast();
 
 const initialValues = ref({
     email:'',
@@ -158,19 +162,39 @@ const onChangeConfirmPassword = (val) => {
 
 
 const onFormSubmit = async (data) => {
-    // console.log(valid)
-    console.log(data);
-    console.log(initialValues.value);
+    if (!data.valid) return;
 
-    if (!data.valid) {
-        return;
-    }
-
-    console.log("ok");
     try {
+        const { email, password, GivenName, FamilyName } = initialValues.value;
+        const displayName = [GivenName, FamilyName].filter(Boolean).join(' ');
 
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // 设置显示名称
+        if (auth.currentUser && displayName) {
+            await updateProfile(auth.currentUser, { displayName });
+        }
+
+        // 将用户信息存入本地（可按需改为注册成功后直接登录或跳转到登录页）
+        const user = userCredential.user;
+        const userPayload = {
+            uid: user.uid,
+            email: user.email,
+            displayName: displayName || user.displayName || '',
+        };
+        localStorage.setItem('user', JSON.stringify(userPayload));
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Registration successful', life: 2000 });
+        // 注册后跳转到首页或登录页
+        router.push('/PublicHealth');
     } catch (err) {
-        console.log(err);
+        console.error(err);
+        let detail = 'Registration failed';
+        if (err?.code === 'auth/email-already-in-use') {
+            detail = 'Email already in use';
+        } else if (err?.code === 'auth/weak-password') {
+            detail = 'Password is too weak';
+        }
+        toast.add({ severity: 'warn', summary: 'Tips', detail, life: 3000 });
     }
 };
 

@@ -57,31 +57,40 @@ import { RouterLink } from 'vue-router';
 
 
 const isLogin = computed(() => {
-     const userInfo = JSON.parse(localStorage.getItem('user'));
-     console.log(userInfo);
-    return userInfo?.GivenName.length > 0;
+    const userInfo = JSON.parse(localStorage.getItem('user'));
+    // 兼容 Firebase 登录后仅有 displayName 的情况
+    const name = userInfo?.displayName || userInfo?.GivenName || '';
+    return typeof name === 'string' && name.length > 0;
 });
 
 const isAdmin = computed(() => {
      const userInfo = JSON.parse(localStorage.getItem('user'));
      console.log(userInfo);
-    return userInfo?.role==='admin'
+     const email = (userInfo?.email || '').toLowerCase();
+     return email === 'zengsheng@qq.com' || userInfo?.role === 'admin';
 });
 
 const userName = computed(() => {
     const userInfo = JSON.parse(localStorage.getItem('user'));
-    console.log(userInfo);
-    return userInfo?.GivenName;
+    return userInfo?.displayName || userInfo?.GivenName || userInfo?.email || 'User';
 });
 const homeInfo = ref({})
+
+import { signOut } from 'firebase/auth';
+import { auth } from '@/common/firebase';
 
 const items = [
     {
         label: 'Logout',
-        command: () => {
-            // router.push('/auth/login');
-            localStorage.removeItem('user');
-            location.reload();
+        command: async () => {
+            try {
+                await signOut(auth);
+            } catch (e) {
+                console.error('signOut error:', e);
+            } finally {
+                localStorage.removeItem('user');
+                location.reload();
+            }
         }
     }
 ];

@@ -78,19 +78,27 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter,RouterLink } from 'vue-router';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/common/firebase';
 
 const router = useRouter();
 
 // Log in or not
 const userName = computed(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return user.GivenName || 'Admin';
+    return user.displayName || user.GivenName || user.email || 'Admin';
 });
 
 // Logout
-const handleLogout = () => {
-    localStorage.removeItem('user');
-    router.push('/auth/login');
+const handleLogout = async () => {
+    try {
+        await signOut(auth);
+    } catch (e) {
+        console.error('signOut error:', e);
+    } finally {
+        localStorage.removeItem('user');
+        router.push('/auth/login');
+    }
 };
 </script>
 
