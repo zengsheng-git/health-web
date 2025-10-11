@@ -6,3 +6,9 @@
 用户名和密码:
 1218128305@qq.com
 ****** 自己的密码
+
+Sydney
+Melbourne
+Brisbane
+Canberra
+Adelaide
