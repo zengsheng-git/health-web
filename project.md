@@ -11,8 +11,3 @@
 
 # sendgrid
 
-SNBWTGPZJDV7V586LKT9Z6R1
-
-1218128305@qq.com
-zs199602.
-
