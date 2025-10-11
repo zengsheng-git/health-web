@@ -218,13 +218,13 @@
   // ---------------------- 2. User login state ----------------------
   const isLogin = computed(() => {
     const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
-    const name = userInfo?.displayName || userInfo?.GivenName || '';
+    const name = userInfo?.displayName  || '';
     return typeof name === 'string' && name.length > 0;
   });
   
   const currentUserName = computed(() => {
     const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
-    return userInfo?.displayName || userInfo?.GivenName || userInfo?.email || 'Guest';
+    return userInfo?.displayName  || userInfo?.email || 'Guest';
   });
   
   // 获取当前用户的email

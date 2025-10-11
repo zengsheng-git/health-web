@@ -59,20 +59,19 @@ import { RouterLink } from 'vue-router';
 const isLogin = computed(() => {
     const userInfo = JSON.parse(localStorage.getItem('user'));
     // 兼容 Firebase 登录后仅有 displayName 的情况
-    const name = userInfo?.displayName || userInfo?.GivenName || '';
+    const name = userInfo?.displayName  || '';
     return typeof name === 'string' && name.length > 0;
 });
 
 const isAdmin = computed(() => {
      const userInfo = JSON.parse(localStorage.getItem('user'));
-     console.log(userInfo);
      const email = (userInfo?.email || '').toLowerCase();
-     return email === 'zengsheng@qq.com' || userInfo?.role === 'admin';
+     return email === 'zengsheng@qq.com';
 });
 
 const userName = computed(() => {
     const userInfo = JSON.parse(localStorage.getItem('user'));
-    return userInfo?.displayName || userInfo?.GivenName || userInfo?.email || 'User';
+    return userInfo?.displayName  || userInfo?.email || 'User';
 });
 const homeInfo = ref({})
 

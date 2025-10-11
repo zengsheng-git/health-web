@@ -86,7 +86,7 @@ const router = useRouter();
 // Log in or not
 const userName = computed(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return user.displayName || user.GivenName || user.email || 'Admin';
+    return user.displayName  || user.email || 'Admin';
 });
 
 // Logout
