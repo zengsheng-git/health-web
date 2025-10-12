@@ -345,7 +345,7 @@
 import { ref, onMounted } from "vue";
 import { FilterMatchMode } from "@primevue/core/api";
 import { useToast } from "primevue/usetoast";
-import { ProductService } from "./mock";
+import { ProductService } from "../mock";
 
 onMounted(() => {
   ProductService.getProducts().then((data) => (products.value = data));

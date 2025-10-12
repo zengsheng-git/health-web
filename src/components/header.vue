@@ -66,7 +66,7 @@ const isLogin = computed(() => {
 const isAdmin = computed(() => {
      const userInfo = JSON.parse(localStorage.getItem('user'));
      const email = (userInfo?.email || '').toLowerCase();
-     return email === 'zengsheng@qq.com';
+     return email === adminEmail;
 });
 
 const userName = computed(() => {
@@ -77,6 +77,7 @@ const homeInfo = ref({})
 
 import { signOut } from 'firebase/auth';
 import { auth } from '@/common/firebase';
+import { adminEmail } from "@/common/util";
 
 const items = [
     {

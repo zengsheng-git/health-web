@@ -24,13 +24,14 @@
                     </li>
                     <!-- Disabled links for future features -->
                     <li>
-                        <a 
-                            href="#" 
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition-colors cursor-not-allowed"
-                        >
+                        <router-link  
+                            to="/admin/userManage" 
+                            class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                            :class="{ 'bg-gray-700 text-white': $route.name === 'UserManage' }"
+                            >
                             <i class="fas fa-users"></i>
                             <span>User management</span>
-                        </a>
+                        </router-link >
                     </li>
                     <li>
                         <a 

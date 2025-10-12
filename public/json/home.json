@@ -17,15 +17,11 @@
            },
            {
              "name":"Events",
-            "url":""
+            "url":"/events"
            },
            {
              "name":"About US",
             "url":""
-           },
-           {
-             "name":"Mapbox",
-            "url":"/mapbox"
            }
         ]
     },
