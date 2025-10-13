@@ -1,39 +1,20 @@
 <template>
-  <Card class="pt-[60px] w-3/5 mx-auto">
+  <Card class="w-full mx-auto">
     <template #content>
       <div>
         <Toolbar class="mb-6">
           <template #start>
             <Button
-              label="New"
-              icon="pi pi-plus"
+              label="刷新"
+              icon="pi pi-refresh"
               class="mr-2"
-              @click="openNew"
-            />
-            <Button
-              label="Delete"
-              icon="pi pi-trash"
-              severity="danger"
-              variant="outlined"
-              @click="confirmDeleteSelected"
-              :disabled="!selectedProducts || !selectedProducts.length"
+              @click="loadUsers"
             />
           </template>
 
           <template #end>
-            <FileUpload
-              mode="basic"
-              accept="image/*"
-              :maxFileSize="1000000"
-              label="Import"
-              customUpload
-              chooseLabel="Import"
-              class="mr-2"
-              auto
-              :chooseButtonProps="{ severity: 'secondary' }"
-            />
             <Button
-              label="Export"
+              label="导出"
               icon="pi pi-upload"
               severity="secondary"
               @click="exportCSV($event)"
@@ -43,455 +24,224 @@
 
         <DataTable
           ref="dt"
-          v-model:selection="selectedProducts"
-          :value="products"
-          dataKey="id"
+          v-model:selection="selectedUsers"
+          :value="users"
+          dataKey="uid"
           size="small"
           :paginator="true"
-          :rows="10"
+          :rows="2"
           :filters="filters"
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          :rowsPerPageOptions="[5, 10, 25]"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+          :rowsPerPageOptions="[2, 5, 10, 25]"
+          currentPageReportTemplate="显示第 {first} 到 {last} 条，共 {totalRecords} 个用户"
+          :loading="loading"
         >
           <template #header>
             <div class="flex flex-wrap gap-2 items-center justify-between">
-              <h4 class="m-0">Manage Products</h4>
+              <h4 class="m-0">用户管理</h4>
               <IconField>
                 <InputIcon>
                   <i class="pi pi-search" />
                 </InputIcon>
                 <InputText
                   v-model="filters['global'].value"
-                  placeholder="Search..."
+                  placeholder="搜索用户..."
                 />
               </IconField>
             </div>
           </template>
 
           <Column
-            selectionMode="multiple"
-            style="width: 3rem"
-            :exportable="false"
-          ></Column>
-          <Column
-            field="code"
-            header="Code"
+            field="uid"
+            header="用户ID"
             sortable
             style="min-width: 12rem"
           ></Column>
           <Column
-            field="name"
-            header="Name"
+            field="email"
+            header="邮箱"
             sortable
             style="min-width: 16rem"
           ></Column>
-          <Column header="Image">
-            <template #body="slotProps">
-              <img
-                :src="`https://primefaces.org/cdn/primevue/images/product/${slotProps.data.image}`"
-                :alt="slotProps.data.image"
-                class="rounded"
-                style="width: 64px"
-              />
-            </template>
-          </Column>
-          <Column field="price" header="Price" sortable style="min-width: 8rem">
-            <template #body="slotProps">
-              {{ formatCurrency(slotProps.data.price) }}
-            </template>
-          </Column>
           <Column
-            field="category"
-            header="Category"
+            field="displayName"
+            header="姓名"
             sortable
-            style="min-width: 10rem"
+            style="min-width: 12rem"
           ></Column>
           <Column
-            field="rating"
-            header="Reviews"
+            field="emailVerified"
+            header="邮箱验证"
             sortable
-            style="min-width: 12rem"
-          >
-            <template #body="slotProps">
-              <Rating :modelValue="slotProps.data.rating" :readonly="true" />
-            </template>
-          </Column>
-          <Column
-            field="inventoryStatus"
-            header="Status"
-            sortable
-            style="min-width: 12rem"
+            style="min-width: 10rem"
           >
             <template #body="slotProps">
               <Tag
-                :value="slotProps.data.inventoryStatus"
-                :severity="getStatusLabel(slotProps.data.inventoryStatus)"
+                :value="slotProps.data.emailVerified ? '已验证' : '未验证'"
+                :severity="slotProps.data.emailVerified ? 'success' : 'warning'"
               />
             </template>
           </Column>
-          <Column :exportable="false" style="min-width: 12rem">
+          <Column
+            field="disabled"
+            header="状态"
+            sortable
+            style="min-width: 10rem"
+          >
             <template #body="slotProps">
-              <Button
-                icon="pi pi-pencil"
-                variant="outlined"
-                rounded
-                class="mr-2"
-                @click="editProduct(slotProps.data)"
-              />
-              <Button
-                icon="pi pi-trash"
-                variant="outlined"
-                rounded
-                severity="danger"
-                @click="confirmDeleteProduct(slotProps.data)"
+              <Tag
+                :value="slotProps.data.disabled ? '禁用' : '启用'"
+                :severity="slotProps.data.disabled ? 'danger' : 'success'"
               />
             </template>
           </Column>
+          <Column
+            field="formattedCreationTime"
+            header="创建时间"
+            sortable
+            style="min-width: 14rem"
+          ></Column>
+          <Column
+            field="formattedLastSignInTime"
+            header="最近登录时间"
+            sortable
+            style="min-width: 14rem"
+          ></Column>
+        
         </DataTable>
       </div>
     </template>
   </Card>
-  <Dialog
-    v-model:visible="productDialog"
-    :style="{ width: '450px' }"
-    header="Product Details"
-    :modal="true"
-  >
-    <div class="flex flex-col gap-6">
-      <img
-        v-if="product.image"
-        :src="`https://primefaces.org/cdn/primevue/images/product/${product.image}`"
-        :alt="product.image"
-        class="block m-auto pb-4"
-      />
-      <div>
-        <label for="name" class="block font-bold mb-3">Name</label>
-        <InputText
-          id="name"
-          v-model.trim="product.name"
-          required="true"
-          autofocus
-          :invalid="submitted && !product.name"
-          fluid
-        />
-        <small v-if="submitted && !product.name" class="text-red-500"
-          >Name is required.</small
-        >
-      </div>
-      <div>
-        <label for="description" class="block font-bold mb-3"
-          >Description</label
-        >
-        <Textarea
-          id="description"
-          v-model="product.description"
-          required="true"
-          rows="3"
-          cols="20"
-          fluid
-        />
-      </div>
-      <div>
-        <label for="inventoryStatus" class="block font-bold mb-3"
-          >Inventory Status</label
-        >
-        <Select
-          id="inventoryStatus"
-          v-model="product.inventoryStatus"
-          :options="statuses"
-          optionLabel="label"
-          placeholder="Select a Status"
-          fluid
-        ></Select>
-      </div>
-
-      <div>
-        <span class="block font-bold mb-4">Category</span>
-        <div class="grid grid-cols-12 gap-4">
-          <div class="flex items-center gap-2 col-span-6">
-            <RadioButton
-              id="category1"
-              v-model="product.category"
-              name="category"
-              value="Accessories"
-            />
-            <label for="category1">Accessories</label>
-          </div>
-          <div class="flex items-center gap-2 col-span-6">
-            <RadioButton
-              id="category2"
-              v-model="product.category"
-              name="category"
-              value="Clothing"
-            />
-            <label for="category2">Clothing</label>
-          </div>
-          <div class="flex items-center gap-2 col-span-6">
-            <RadioButton
-              id="category3"
-              v-model="product.category"
-              name="category"
-              value="Electronics"
-            />
-            <label for="category3">Electronics</label>
-          </div>
-          <div class="flex items-center gap-2 col-span-6">
-            <RadioButton
-              id="category4"
-              v-model="product.category"
-              name="category"
-              value="Fitness"
-            />
-            <label for="category4">Fitness</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-6">
-          <label for="price" class="block font-bold mb-3">Price</label>
-          <InputNumber
-            id="price"
-            v-model="product.price"
-            mode="currency"
-            currency="USD"
-            locale="en-US"
-            fluid
-          />
-        </div>
-        <div class="col-span-6">
-          <label for="quantity" class="block font-bold mb-3">Quantity</label>
-          <InputNumber
-            id="quantity"
-            v-model="product.quantity"
-            integeronly
-            fluid
-          />
-        </div>
-      </div>
-    </div>
-
-    <template #footer>
-      <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
-      <Button label="Save" icon="pi pi-check" @click="saveProduct" />
-    </template>
-  </Dialog>
-
-  <Dialog
-    v-model:visible="deleteProductDialog"
-    :style="{ width: '450px' }"
-    header="Confirm"
-    :modal="true"
-  >
-    <div class="flex items-center gap-4">
-      <i class="pi pi-exclamation-triangle !text-3xl" />
-      <span v-if="product"
-        >Are you sure you want to delete <b>{{ product.name }}</b
-        >?</span
-      >
-    </div>
-    <template #footer>
-      <Button
-        label="No"
-        icon="pi pi-times"
-        text
-        @click="deleteProductDialog = false"
-        severity="secondary"
-        variant="text"
-      />
-      <Button
-        label="Yes"
-        icon="pi pi-check"
-        @click="deleteProduct"
-        severity="danger"
-      />
-    </template>
-  </Dialog>
-
-  <Dialog
-    v-model:visible="deleteProductsDialog"
-    :style="{ width: '450px' }"
-    header="Confirm"
-    :modal="true"
-  >
-    <div class="flex items-center gap-4">
-      <i class="pi pi-exclamation-triangle !text-3xl" />
-      <span v-if="product"
-        >Are you sure you want to delete the selected products?</span
-      >
-    </div>
-    <template #footer>
-      <Button
-        label="No"
-        icon="pi pi-times"
-        text
-        @click="deleteProductsDialog = false"
-        severity="secondary"
-        variant="text"
-      />
-      <Button
-        label="Yes"
-        icon="pi pi-check"
-        text
-        @click="deleteSelectedProducts"
-        severity="danger"
-      />
-    </template>
-  </Dialog>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { FilterMatchMode } from "@primevue/core/api";
 import { useToast } from "primevue/usetoast";
-import { ProductService } from "../mock";
 
-onMounted(() => {
-  ProductService.getProducts().then((data) => (products.value = data));
-});
+const API_URL = "https://us-central1-cxre-423d7.cloudfunctions.net/getAllAuthUsers";
 
 const toast = useToast();
 const dt = ref();
-const products = ref();
-const productDialog = ref(false);
-const deleteProductDialog = ref(false);
-const deleteProductsDialog = ref(false);
-const product = ref({});
-const selectedProducts = ref();
+const users = ref([]);
+const selectedUsers = ref();
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
-const submitted = ref(false);
-const statuses = ref([
-  { label: "INSTOCK", value: "instock" },
-  { label: "LOWSTOCK", value: "lowstock" },
-  { label: "OUTOFSTOCK", value: "outofstock" },
-]);
+const loading = ref(false);
 
-const formatCurrency = (value) => {
-  if (value)
-    return value.toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
+onMounted(() => {
+  loadUsers();
+});
+
+const loadUsers = async () => {
+  loading.value = true;
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    
+    // 在数据加载时立即格式化时间
+    users.value = (data.users || []).map(user => ({
+      ...user,
+      formattedCreationTime: formatDate(user.metadata?.creationTime),
+      formattedLastSignInTime: formatDate(user.metadata?.lastSignInTime)
+    }));
+    
+    toast.add({
+      severity: "success",
+      summary: "成功",
+      detail: `已加载 ${users.value.length} 个用户`,
+      life: 3000,
     });
-  return;
-};
-const openNew = () => {
-  product.value = {};
-  submitted.value = false;
-  productDialog.value = true;
-};
-const hideDialog = () => {
-  productDialog.value = false;
-  submitted.value = false;
-};
-const saveProduct = () => {
-  submitted.value = true;
-
-  if (product?.value.name?.trim()) {
-    if (product.value.id) {
-      product.value.inventoryStatus = product.value.inventoryStatus.value
-        ? product.value.inventoryStatus.value
-        : product.value.inventoryStatus;
-      products.value[findIndexById(product.value.id)] = product.value;
-      toast.add({
-        severity: "success",
-        summary: "Successful",
-        detail: "Product Updated",
-        life: 3000,
-      });
-    } else {
-      product.value.id = createId();
-      product.value.code = createId();
-      product.value.image = "product-placeholder.svg";
-      product.value.inventoryStatus = product.value.inventoryStatus
-        ? product.value.inventoryStatus.value
-        : "INSTOCK";
-      products.value.push(product.value);
-      toast.add({
-        severity: "success",
-        summary: "Successful",
-        detail: "Product Created",
-        life: 3000,
-      });
-    }
-
-    productDialog.value = false;
-    product.value = {};
+  } catch (error) {
+    console.error("获取用户数据失败:", error);
+    toast.add({
+      severity: "error",
+      summary: "错误",
+      detail: "获取用户数据失败",
+      life: 3000,
+    });
+  } finally {
+    loading.value = false;
   }
 };
-const editProduct = (prod) => {
-  product.value = { ...prod };
-  productDialog.value = true;
-};
-const confirmDeleteProduct = (prod) => {
-  product.value = prod;
-  deleteProductDialog.value = true;
-};
-const deleteProduct = () => {
-  products.value = products.value.filter((val) => val.id !== product.value.id);
-  deleteProductDialog.value = false;
-  product.value = {};
+
+const editUser = (user) => {
   toast.add({
-    severity: "success",
-    summary: "Successful",
-    detail: "Product Deleted",
+    severity: "info",
+    summary: "提示",
+    detail: "编辑用户功能开发中",
     life: 3000,
   });
 };
-const findIndexById = (id) => {
-  let index = -1;
-  for (let i = 0; i < products.value.length; i++) {
-    if (products.value[i].id === id) {
-      index = i;
-      break;
-    }
-  }
 
-  return index;
+const confirmDeleteUser = (user) => {
+  toast.add({
+    severity: "info",
+    summary: "提示",
+    detail: "删除用户功能开发中",
+    life: 3000,
+  });
 };
-const createId = () => {
-  let id = "";
-  var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (var i = 0; i < 5; i++) {
-    id += chars.charAt(Math.floor(Math.random() * chars.length));
+
+const formatDate = (dateString) => {
+  if (!dateString) return '-';
+  try {
+    const date = new Date(dateString);
+    // 确保时间包含秒数 - 使用更可靠的方法
+    if (!isNaN(date.getTime())) {
+      // 使用toLocaleString确保正确的时区处理
+      const formattedDate = date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).replace(/\//g, '-');
+      
+      return formattedDate;
+    }
+    return dateString;
+  } catch (error) {
+    console.error('日期格式化错误:', error);
+    return dateString;
   }
-  return id;
 };
+
 const exportCSV = () => {
-  dt.value.exportCSV();
-};
-const confirmDeleteSelected = () => {
-  deleteProductsDialog.value = true;
-};
-const deleteSelectedProducts = () => {
-  products.value = products.value.filter(
-    (val) => !selectedProducts.value.includes(val)
-  );
-  deleteProductsDialog.value = false;
-  selectedProducts.value = null;
-  toast.add({
-    severity: "success",
-    summary: "Successful",
-    detail: "Products Deleted",
-    life: 3000,
+  // 使用自定义导出确保时间格式正确
+  const csvContent = [];
+  
+  // 添加表头
+  csvContent.push(['用户ID', '邮箱', '姓名', '邮箱验证', '状态', '创建时间', '最近登录时间'].join(','));
+  
+  // 添加数据行
+  users.value.forEach(user => {
+    csvContent.push([
+      user.uid,
+      `"${user.email}"`,
+      `"${user.displayName || '-'}"`,
+      user.emailVerified ? '已验证' : '未验证',
+      user.disabled ? '禁用' : '启用',
+      `"${user.formattedCreationTime}"`,
+      `"${user.formattedLastSignInTime}"`
+    ].join(','));
   });
-};
-
-const getStatusLabel = (status) => {
-  switch (status) {
-    case "INSTOCK":
-      return "success";
-
-    case "LOWSTOCK":
-      return "warn";
-
-    case "OUTOFSTOCK":
-      return "danger";
-
-    default:
-      return null;
-  }
+  
+  // 创建下载链接
+  const blob = new Blob([csvContent.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `users_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 </script>

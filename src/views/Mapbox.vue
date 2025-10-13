@@ -5,7 +5,7 @@
             <!-- Search Controls -->
             <div class="absolute top-[70px] left-4 right-4 z-10 flex gap-4">
                 <!-- Attraction Search -->
-                <div class="bg-white rounded-lg shadow-lg p-4 w-80">
+                <div class="bg-white bg-opacity-60 rounded-lg shadow-lg p-4 w-80">
                     <h3 class="text-lg font-semibold mb-3">景点搜索</h3>
                     <div class="flex gap-2 mb-3">
                         <input 
@@ -25,13 +25,13 @@
                             class="p-2 hover:bg-gray-100 cursor-pointer text-sm border-b last:border-b-0"
                         >
                             <div class="font-medium">{{ result.place_name }}</div>
-                            <div class="text-xs text-gray-500">{{ result.properties?.category || '景点' }}</div>
+                            <div class="text-xs text-gray-500">{{ result.properties?.category || 'Target' }}</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Start Location Search -->
-                <div class="bg-white rounded-lg shadow-lg p-4 w-80">
+                <div class="bg-white bg-opacity-60 rounded-lg shadow-lg p-4 w-80">
                     <h3 class="text-lg font-semibold mb-3">起点位置</h3>
                     <div class="flex gap-2 mb-3">
                         <input 
@@ -56,7 +56,7 @@
                 </div>
 
                 <!-- End Location Search -->
-                <div class="bg-white rounded-lg shadow-lg p-4 w-80">
+                <div class="bg-white bg-opacity-60 rounded-lg shadow-lg p-4 w-80">
                     <h3 class="text-lg font-semibold mb-3">终点位置</h3>
                     <div class="flex gap-2 mb-3">
                         <input 
@@ -81,7 +81,7 @@
                 </div>
 
                 <!-- Navigation Controls -->
-                <div class="bg-white rounded-lg shadow-lg p-4">
+                <div class="bg-white bg-opacity-60 rounded-lg shadow-lg p-4">
                     <h3 class="text-lg font-semibold mb-3">导航控制</h3>
                     <div class="flex gap-2">
                         <button 
@@ -274,7 +274,7 @@ const selectAttraction = async (result: any) => {
         const mapboxgl = await loadMapbox();
         
         // Create a special marker for searched attraction
-        new mapboxgl.Marker({ color: '#8B5CF6', element: createMarkerElement('景点', '#8B5CF6') })
+        new mapboxgl.Marker({ color: '#8B5CF6', element: createMarkerElement('Target', '#8B5CF6') })
             .setLngLat(result.geometry.coordinates)
             .addTo(map.value);
             
