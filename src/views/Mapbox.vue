@@ -3,7 +3,7 @@
         <!-- Map Container -->
         <div class="relative h-screen">
             <!-- Search Controls -->
-            <div class="absolute top-[70px] left-4 right-4 z-10 flex gap-4">
+            <div class="absolute top-[70px] left-4 right-4 z-10 flex justify-between gap-4">
                 <!-- Attraction Search -->
                 <div class="bg-white bg-opacity-60 rounded-lg shadow-lg p-4 w-80">
                     <h3 class="text-lg font-semibold mb-3">景点搜索</h3>
@@ -294,7 +294,7 @@ const initializeMap = async () => {
         map.value = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v12',
-            center: [116.3974, 39.9093], // Beijing coordinates
+            center: [144.9631, -37.8136], // Melbourne coordinates
             zoom: 10
         });
 

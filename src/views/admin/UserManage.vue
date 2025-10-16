@@ -1,5 +1,5 @@
 <template>
-  <Card class="w-full mx-auto">
+  <Card class="w-[95%] mx-auto">
     <template #content>
       <div>
         <Toolbar class="mb-6">

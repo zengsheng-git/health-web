@@ -56,7 +56,7 @@
         </aside>
         
         <!-- Main content area -->
-        <div class="flex-1 ml-64">
+        <div class="flex-1 ml-64 bg-gray-50">
             <!-- Header -->
             <header class="h-16 bg-white border-b border-gray-200 fixed top-0 right-0 left-64 z-30 flex items-center justify-end px-6">
                 <div class="flex items-center gap-4">
