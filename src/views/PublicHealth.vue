@@ -54,6 +54,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Back to Top Component -->
+        <BackToTop />
     </div>
 </template>
 
@@ -66,8 +69,30 @@ const router = useRouter();
 
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { RouterLink } from 'vue-router';
+import BackToTop from '@/components/BackToTop.vue';
 
-const homeInfo = ref({})
+interface HomeInfo {
+  banner?: {
+    bannerTitle?: string;
+    bannerDes?: string;
+    bannerBtnName?: string;
+  };
+  EducationalResources?: {
+    title?: string;
+    des?: string;
+    categories?: Array<{
+      id: number;
+      title: string;
+      description: string;
+      image: string;
+      Key?: string[];
+      Tags?: string[];
+      RatingValAll?: number;
+    }>;
+  };
+}
+
+const homeInfo = ref<HomeInfo>({})
 
 const scrollY = ref(0);
 

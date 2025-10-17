@@ -170,7 +170,7 @@
                                       </div>
                                        
                                         <div>
-                                            <!-- Delete button, only for own comments -->
+                                              <!-- Delete button, only for own comments -->
                                             <button
                                                 v-if="comment.email === currentUserEmail"
                                                 @click="confirmDelete(comment.id)"
@@ -197,6 +197,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Back to Top Component -->
+        <BackToTop />
     </div>
   </template>
   
@@ -208,6 +211,7 @@
   import { useToast } from 'primevue/usetoast';
   import { db } from '@/common/firebase';
   import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+  import BackToTop from '@/components/BackToTop.vue';
 
   const toast = useToast();
   const confirm = useConfirm();
@@ -227,16 +231,30 @@
     return userInfo?.displayName  || userInfo?.email || 'Guest';
   });
   
-  // Get current user email for comment ownership check
+// Get current user email for comment ownership check
   const currentUserEmail = computed(() => {
     const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
     return userInfo?.email || '';
   });
-  
+
   // ---------------------- 3. Product detail logic ----------------------
   const route = useRoute();
   const router = useRouter();
-  const homeInfo = ref({}); // 
+interface HomeInfo {
+  EducationalResources?: {
+    categories?: Array<{
+      id: number;
+      title: string;
+      description: string;
+      image: string;
+      Key?: string[];
+      Tags?: string[];
+      RatingValAll?: number;
+    }>;
+  };
+}
+
+const homeInfo = ref<HomeInfo>({}); // 
   
   //
   const resourceIndex = computed(() => {
@@ -294,7 +312,7 @@
     email: string;
   }
   
-  // Responsive data
+// Responsive data
   const newCommentContent = ref(''); 
   const comments = ref<CommentType[]>([]); 
   const isCommentLoading = ref(false); 
@@ -303,7 +321,7 @@
   const submitError = ref('');  
   const RatingVal = ref(null);  
   
-  // Fetch comments from Firestore for the current resource
+ // Fetch comments from Firestore for the current resource
   const fetchComments = async () => {
     isCommentLoading.value = true;
     commentError.value = '';
@@ -413,7 +431,7 @@
 
     const deleteComment = async (commentId) => {
       try {
-        // Check if the comment exists and belongs to the current user
+       // Check if the comment exists and belongs to the current user
         const target = comments.value.find(c => c && c.id === commentId);
         if (!target) {
           toast.add({ severity: 'info', summary: 'Tips', detail: 'Comment not found', life: 3000 });
@@ -424,7 +442,7 @@
           return;
         }
 
-        // Delete from Firestore
+      // Delete from Firestore
         const snap = await getDoc(commentsDocRef);
         const data = snap.exists() ? (snap.data() as Record<string, CommentType[]>) : {};
         const key = String(resourceIndex.value);
@@ -432,7 +450,7 @@
         const newArr = arr.filter(c => c && c.id !== commentId);
         await setDoc(commentsDocRef, { [key]: newArr }, { merge: true });
 
-        // Update local state
+   // Update local state
         comments.value = comments.value.filter(comment => comment.id !== commentId);
         toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Comment deleted successfully', life: 3000 });
       } catch (error) {
