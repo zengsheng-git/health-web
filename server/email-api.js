@@ -82,7 +82,6 @@ app.post('/api/send-email', upload.single('attachment'), async (req, res) => {
       subject: `${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">新的联系表单提交</h2>
           <div style="background: #f5f5f5; padding: 20px; border-radius: 8px;">
             <p><strong>姓名:</strong> ${name}</p>
             <p><strong>主题:</strong> ${subject}</p>
@@ -91,9 +90,6 @@ app.post('/api/send-email', upload.single('attachment'), async (req, res) => {
               ${message.replace(/\n/g, '<br>')}
             </div>
           </div>
-          <p style="color: #666; font-size: 12px; margin-top: 20px;">
-            此邮件由健康营养教育平台自动发送
-          </p>
         </div>
       `
     }
