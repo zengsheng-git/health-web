@@ -7,6 +7,21 @@
 1218128305@qq.com
 ****** 自己的密码
 
+## qq邮箱
+opsokizeoixxjiie
+
+## emailjs
+https://dashboard.emailjs.com/admin
+1218128305@qq.com
+zs199602.
+
+service_atf6qh8
+template_pj969oq
+公用密钥
+4_aa__Eo4tqK9-cZt
+私钥
+a1l7xJf3pKBG8nHRtTp95
+
 ## 澳大利亚城市
 Sydney 悉尼
 Melbourne 墨尔本

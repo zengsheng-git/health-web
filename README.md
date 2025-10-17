@@ -102,7 +102,29 @@
 - **响应式设计**: 适配不同屏幕尺寸的管理界面
 - **操作便捷**: 一键操作和批量处理功能
 
-### 6. 技术架构特色
+### 6. 邮件发送与联系系统
+
+#### 前端联系表单
+- **响应式表单设计**: 基于PrimeVue组件的现代化表单界面
+- **实时表单验证**: 客户端即时验证用户输入和文件类型
+- **文件上传功能**: 支持PDF、Word文档、图片文件上传（最大10MB）
+- **加载状态管理**: 发送过程中的加载指示器和禁用状态
+- **用户反馈**: 成功/失败提示和确认邮件发送
+
+#### 后端邮件服务
+- **Express服务器**: 基于Node.js和Express框架的RESTful API
+- **SMTP集成**: 使用Nodemailer集成多种邮件服务提供商
+- **文件处理**: Multer中间件处理文件上传和验证
+- **安全防护**: 双重文件验证和自动清理临时文件
+- **错误处理**: 完善的错误日志和用户友好的错误信息
+
+#### 邮件功能特性
+- **自动回复**: 向用户发送确认邮件，提升用户体验
+- **HTML邮件模板**: 专业的邮件格式和品牌一致性
+- **附件支持**: 完整的附件上传、验证和发送流程
+- **多提供商支持**: 兼容Gmail、QQ邮箱等主流邮件服务
+
+### 7. 技术架构特色
 
 #### 前端架构
 - **Vue 3组合式API**: 使用setup语法糖，代码结构清晰
@@ -180,10 +202,71 @@ pnpm build
 pnpm lint
 ```
 
+## 📧 邮件发送功能配置
+
+### 启动邮件服务
+邮件发送功能需要单独启动后端服务：
+
+```sh
+# 进入server目录
+cd server
+
+# 安装依赖
+npm install
+
+# 启动邮件服务（需要配置环境变量）
+npm start
+
+# 开发模式启动（自动重启）
+npm run dev
+```
+
+### 邮件服务功能特性
+- **支持附件上传**：PDF、Word文档、图片文件（最大10MB）
+- **双重验证**：客户端和服务端双重文件类型和大小验证
+- **自动回复**：发送确认邮件给用户
+- **错误处理**：完善的错误处理和用户提示
+- **文件安全**：自动清理临时上传文件
+
+### SMTP配置说明
+项目支持多种邮件服务提供商：
+
+#### Gmail配置
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+```
+
+#### QQ邮箱配置
+```env
+SMTP_HOST=smtp.qq.com
+SMTP_PORT=587
+SMTP_USER=your-email@qq.com
+SMTP_PASS=your-authorization-code
+```
+
+#### 其他SMTP服务
+```env
+SMTP_HOST=your-smtp-server.com
+SMTP_PORT=587
+SMTP_USER=your-username
+SMTP_PASS=your-password
+```
+
+### 前端邮件表单功能
+- **表单验证**：实时验证用户输入和文件类型
+- **文件预览**：显示已选择文件的名称和大小
+- **加载状态**：发送过程中的加载指示器
+- **成功反馈**：发送成功后的确认提示
+- **错误处理**：友好的错误提示信息
+
 ## 🔧 环境配置
 
 项目使用环境变量配置，需要创建 `.env` 文件并配置以下变量：
 
+### 前端环境变量
 ```env
 VITE_API_KEY=your_firebase_api_key
 VITE_AUTH_DOMAIN=your_firebase_auth_domain
@@ -192,6 +275,16 @@ VITE_STORAGE_BUCKET=your_firebase_storage_bucket
 VITE_MESSAGING_SENDER_ID=your_firebase_sender_id
 VITE_APP_ID=your_firebase_app_id
 VITE_MapboxglAccessToken=your_mapbox_access_token
+VITE_EMAIL_API_URL=http://localhost:3001/api/send-email
+```
+
+### 邮件服务环境变量（后端）
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+CONTACT_EMAIL=contact@health-education.com
 ```
 
 ## 📈 未来规划
