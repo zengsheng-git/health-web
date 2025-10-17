@@ -2,13 +2,13 @@
  * @Author: zengsheng 12181283
  * @Date: 2025-10-17 15:33:48
  * @LastEditors: zengsheng 12181283
- * @LastEditTime: 2025-10-17 18:57:45
+ * @LastEditTime: 2025-10-17 17:57:36
  * @FilePath: \health-web\src\views\Aboutus.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 <template>
   <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-4xl mx-auto px-4 pt-[70px]">
+    <div class="max-w-4xl mx-auto px-4 pt-[50px]">
       <!-- 页面标题 -->
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-gray-800 mb-4">关于我们</h1>
@@ -116,7 +116,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useToast } from 'primevue/usetoast'
-// import {sendEmailWithAttachment} from './send'
+
 const toast = useToast()
 
 // 表单数据
@@ -128,7 +128,6 @@ const formData = ref({
 })
 
 const fileInput = ref(null)
-const isSending = ref(false)
 
 // 处理文件上传
 const handleFileUpload = (event) => {
@@ -178,36 +177,61 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// 发送邮件
+// 发送邮件 - 使用Firebase Functions
 const sendEmail = async () => {
+  if (!formData.value.name || !formData.value.subject || !formData.value.message) {
+    toast.add({
+      severity: 'warn',
+      summary: '请填写完整',
+      detail: '请填写姓名、主题和消息内容',
+      life: 3000
+    })
+    return
+  }
 
-  // sendEmailWithAttachment();
-
+  const isSending = ref(false)
+  
   if (isSending.value) return
-  
   isSending.value = true
-  
+
   try {
-    // 创建FormData对象
-    const formDataToSend = new FormData()
-    formDataToSend.append('name', formData.value.name)
-    formDataToSend.append('email', formData.value.email)
-    formDataToSend.append('subject', formData.value.subject)
-    formDataToSend.append('message', formData.value.message)
+    // Firebase Functions端点（部署后需要替换为实际URL）
+    const functionUrl = 'https://us-central1-your-project-id.cloudfunctions.net/sendContactEmail'
     
-    // 如果有附件，添加到FormData
+    // 准备附件数据（如果有附件）
+    let attachmentData = null;
     if (formData.value.attachment) {
-      formDataToSend.append('attachment', formData.value.attachment)
+      // 将文件转换为base64
+      const file = formData.value.attachment;
+      const base64Content = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+      });
+      
+      attachmentData = {
+        filename: file.name,
+        content: base64Content
+      };
     }
     
-    // 发送邮件请求 - 使用环境变量配置的API地址
-    const apiUrl = import.meta.env.VITE_EMAIL_API_URL || 'http://localhost:3001/api/send-email'
-    const response = await fetch(apiUrl, {
+    const response = await fetch(functionUrl, {
       method: 'POST',
-      body: formDataToSend
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: formData.value.name,
+        subject: formData.value.subject,
+        message: formData.value.message,
+        attachment: attachmentData
+      })
     })
-    
-    if (response.ok) {
+
+    const result = await response.json()
+
+    if (result.success) {
       toast.add({
         severity: 'success',
         summary: '发送成功',
@@ -216,14 +240,15 @@ const sendEmail = async () => {
       })
       resetForm()
     } else {
-      throw new Error('发送失败')
+      throw new Error(result.message)
     }
+    
   } catch (error) {
     console.error('发送邮件失败:', error)
     toast.add({
       severity: 'error',
       summary: '发送失败',
-      detail: '邮件发送失败，请稍后重试或直接联系我们',
+      detail: error.message || '邮件发送失败，请稍后重试',
       life: 5000
     })
   } finally {
@@ -235,7 +260,6 @@ const sendEmail = async () => {
 const resetForm = () => {
   formData.value = {
     name: '',
-    email: '',
     subject: '',
     message: '',
     attachment: null

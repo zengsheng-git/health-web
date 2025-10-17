@@ -78,14 +78,15 @@ app.post('/api/send-email', upload.single('attachment'), async (req, res) => {
     
     const mailOptions = {
       from: '1218128305@qq.com',
-      to: 'zengsheng0870@dingtalk.com',
+      // to: 'zengsheng0870@dingtalk.com',
+      to: 'x0165392@gmail.com',
       subject: `${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: #f5f5f5; padding: 20px; border-radius: 8px;">
-            <p><strong>姓名:</strong> ${name}</p>
-            <p><strong>主题:</strong> ${subject}</p>
-            <p><strong>消息内容:</strong></p>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Theme:</strong> ${subject}</p>
+            <p><strong>Message content:</strong></p>
             <div style="background: white; padding: 15px; border-radius: 4px; margin-top: 10px;">
               ${message.replace(/\n/g, '<br>')}
             </div>
