@@ -6,12 +6,12 @@
             <div class="absolute top-[70px] left-4 right-4 z-10 flex justify-between gap-4">
                 <!-- Attraction Search -->
                 <div class="bg-white bg-opacity-60 rounded-lg shadow-lg p-4 w-80">
-                    <h3 class="text-lg font-semibold mb-3">景点搜索</h3>
+                    <h3 class="text-lg font-semibold mb-3">Attraction search</h3>
                     <div class="flex gap-2 mb-3">
                         <input 
                             v-model="attractionSearch" 
                             @input="debouncedSearchAttractions"
-                            placeholder="搜索景点名称..."
+                            placeholder="Search attraction names..."
                             class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
@@ -32,12 +32,12 @@
 
                 <!-- Start Location Search -->
                 <div class="bg-white bg-opacity-60 rounded-lg shadow-lg p-4 w-80">
-                    <h3 class="text-lg font-semibold mb-3">起点位置</h3>
+                    <h3 class="text-lg font-semibold mb-3">Starting position</h3>
                     <div class="flex gap-2 mb-3">
                         <input 
                             v-model="startLocation" 
                             @input="searchStartLocation"
-                            placeholder="输入起点位置..."
+                            placeholder="Enter starting location..."
                             class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                     </div>
@@ -57,12 +57,12 @@
 
                 <!-- End Location Search -->
                 <div class="bg-white bg-opacity-60 rounded-lg shadow-lg p-4 w-80">
-                    <h3 class="text-lg font-semibold mb-3">终点位置</h3>
+                    <h3 class="text-lg font-semibold mb-3">End position</h3>
                     <div class="flex gap-2 mb-3">
                         <input 
                             v-model="endLocation" 
                             @input="searchEndLocation"
-                            placeholder="输入终点位置..."
+                            placeholder="Enter end location..."
                             class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                     </div>
@@ -82,28 +82,28 @@
 
                 <!-- Navigation Controls -->
                 <div class="bg-white bg-opacity-60 rounded-lg shadow-lg p-4">
-                    <h3 class="text-lg font-semibold mb-3">导航控制</h3>
+                    <h3 class="text-lg font-semibold mb-3">Navigation controls</h3>
                     <div class="flex gap-2">
                         <button 
                             @click="calculateRoute"
                             :disabled="!startCoordinates || !endCoordinates"
                             class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                         >
-                            开始导航
+                            Start navigation
                         </button>
                         <button 
                             @click="clearRoute"
                             class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
                         >
-                            清除路线
+                            Clear route
                         </button>
                     </div>
                     
                     <!-- Route Info -->
                     <div v-if="routeInfo" class="mt-3 p-3 bg-green-50 rounded">
                         <div class="text-sm text-green-800">
-                            <div>距离: {{ routeInfo.distance }} km</div>
-                            <div>预计时间: {{ routeInfo.duration }} 分钟</div>
+                            <div>Distance: {{ routeInfo.distance }} km</div>
+                            <div>Estimated time: {{ routeInfo.duration }} min</div>
                         </div>
                     </div>
                 </div>
@@ -190,7 +190,7 @@ const searchAttractions = async () => {
         console.log('Final search results set:', attractionSearchResults.value);
     } catch (error) {
         console.error('Attraction search error:', error);
-        alert('搜索失败，请稍后重试');
+        alert('Search failed, please try again later');
     }
 };
 
@@ -222,11 +222,11 @@ const selectAttractionAsStart = async (result: any) => {
         
         const mapboxgl = await loadMapbox();
         
-        new mapboxgl.Marker({ color: '#10B981', element: createMarkerElement('起点', '#10B981') })
+        new mapboxgl.Marker({ color: '#10B981', element: createMarkerElement('Start location', '#10B981') })
             .setLngLat(result.geometry.coordinates)
             .addTo(map.value);
             
-        // 加快地图移动速度，设置duration为300毫秒
+        // Speed ​​up the map movement and set the duration to 300 milliseconds
         map.value.flyTo({ center: result.geometry.coordinates, zoom: 10, duration: 300 });
     }
 };
@@ -249,11 +249,11 @@ const selectAttractionAsEnd = async (result: any) => {
         
         const mapboxgl = await loadMapbox();
         
-        new mapboxgl.Marker({ color: '#EF4444', element: createMarkerElement('终点', '#EF4444') })
+        new mapboxgl.Marker({ color: '#EF4444', element: createMarkerElement('End location', '#EF4444') })
             .setLngLat(result.geometry.coordinates)
             .addTo(map.value);
             
-        // 加快地图移动速度，设置duration为300毫秒
+        // Speed ​​up the map movement and set the duration to 300 milliseconds
         map.value.flyTo({ center: result.geometry.coordinates, zoom: 10, duration: 300 });
     }
 };
@@ -278,10 +278,10 @@ const selectAttraction = async (result: any) => {
             .setLngLat(result.geometry.coordinates)
             .addTo(map.value);
             
-        // 加快地图移动速度，设置duration为300毫秒
+        // Speed ​​up the map movement and set the duration to 300 milliseconds
         map.value.flyTo({ center: result.geometry.coordinates, zoom: 10, duration: 300 });
         
-        // 不再自动设置为起点和终点，避免影响其他输入框
+        // Set as start location by default
     }
 };
 
@@ -315,7 +315,7 @@ const searchLocation = async (query: string, type: 'start' | 'end') => {
     }
 
     try {
-        // 移除country=cn参数，允许搜索全球地点
+        // console.log(`Searching ${type} location for:`, query);
         const response = await fetch(
             `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxglAccessToken}&limit=5`
         );
@@ -361,11 +361,11 @@ const selectStartLocation = async (result: any) => {
         
         const mapboxgl = await loadMapbox();
         
-        new mapboxgl.Marker({ color: '#10B981', element: createMarkerElement('起点', '#10B981') })
+        new mapboxgl.Marker({ color: '#10B981', element: createMarkerElement('Start location', '#10B981') })
             .setLngLat(result.geometry.coordinates)
             .addTo(map.value);
             
-        // 加快地图移动速度，设置duration为300毫秒
+        // Speed ​​up the map movement and set the duration to 300 milliseconds
         map.value.flyTo({ center: result.geometry.coordinates, zoom: 10, duration: 300 });
     }
 };
@@ -383,11 +383,11 @@ const selectEndLocation = async (result: any) => {
         
         const mapboxgl = await loadMapbox();
         
-        new mapboxgl.Marker({ color: '#EF4444', element: createMarkerElement('终点', '#EF4444') })
+        new mapboxgl.Marker({ color: '#EF4444', element: createMarkerElement('End location', '#EF4444') })
             .setLngLat(result.geometry.coordinates)
             .addTo(map.value);
             
-        // 加快地图移动速度，设置duration为300毫秒
+        // Speed ​​up the map movement and set the duration to 300 milliseconds
         map.value.flyTo({ center: result.geometry.coordinates, zoom: 10, duration: 300 });
     }
 };
@@ -395,7 +395,7 @@ const selectEndLocation = async (result: any) => {
 // Create custom marker element
 const createMarkerElement = (text: string, color: string) => {
     const element = document.createElement('div');
-    element.id = text === '起点' ? 'start-marker' : 'end-marker';
+    element.id = text === 'Start location' ? 'start-marker' : 'end-marker';
     element.innerHTML = `
         <div style="background-color: ${color}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap;">
             ${text}
@@ -432,60 +432,61 @@ const reverseGeocode = async (coords: [number, number], type: 'start' | 'end') =
 // Calculate route using Mapbox Directions API with fallback to other modes
 const calculateRoute = async () => {
     if (!startCoordinates.value || !endCoordinates.value || !map.value) {
-        alert('请选择起点和终点位置');
+        alert('Please select the start location and end location');
         return;
     }
 
     try {
-        // 定义多种交通模式，按优先级尝试
+        // Try multiple modes: driving-traffic, driving, walking, cycling
         const modes = ['driving-traffic', 'driving', 'walking', 'cycling'];
         let routeFound = false;
         let lastError = null;
         
-        // 计算两点之间的直线距离（公里）作为预检查
+        // Calculate straight-line distance between start and end points
         const straightLineDistance = calculateStraightLineDistance(startCoordinates.value, endCoordinates.value);
-        console.log(`起点到终点的直线距离: ${straightLineDistance.toFixed(2)} 公里`);
+        console.log(`Straight-line distance from start to end:${straightLineDistance.toFixed(2)} kilometer`);
         
-        // 根据距离调整尝试的交通模式
+        // Create a copy of modes to modify based on distance
         let modesToTry = [...modes];
         
-        // 对于超长距离，跳过不适合的交通模式
+        // Adjust modes based on distance
         if (straightLineDistance > 500) {
-            // 500公里以上的距离，只尝试驾驶模式
+            // More than 500 km, try driving mode only
             modesToTry = modes.filter(mode => mode.startsWith('driving'));
-            console.log(`距离超过500公里，仅尝试驾驶模式: ${modesToTry.join(', ')}`);
+            console.log(`For distances over 500 km, try driving mode only: ${modesToTry.join(', ')}`);
         } else if (straightLineDistance > 100) {
-            // 100-500公里，跳过步行和骑行模式
+            // More than 100 km, skip walking and cycling
             modesToTry = modes.filter(mode => mode !== 'walking' && mode !== 'cycling');
-            console.log(`距离超过100公里，跳过步行和骑行模式: ${modesToTry.join(', ')}`);
+            console.log(`For distances over 100 km, skip walking and cycling modes: ${modesToTry.join(', ')}`);
         }
         
-        console.log(`开始尝试多种交通模式的路线计算: 起点=${startCoordinates.value}, 终点=${endCoordinates.value}`);
+        console.log(`Start trying route calculation for multiple modes of transportation: Starting point
+=${startCoordinates.value}, End=${endCoordinates.value}`);
         
         for (const mode of modesToTry) {
             try {
                 const requestUrl = `https://api.mapbox.com/directions/v5/mapbox/${mode}/${startCoordinates.value[0]},${startCoordinates.value[1]};${endCoordinates.value[0]},${endCoordinates.value[1]}?access_token=${mapboxglAccessToken}&geometries=geojson&overview=full`;
-                console.log(`尝试模式 ${mode}, 请求URL:`, requestUrl);
+                console.log(`Try mode ${mode}, request URL:`, requestUrl);
                 
                 const response = await fetch(requestUrl);
-                console.log(`模式 ${mode} 响应状态:`, response.status);
+                console.log(`Mode ${mode} Response status:`, response.status);
                 
                 const data = await response.json();
-                console.log(`模式 ${mode} 响应数据:`, data);
+                console.log(`Mode ${mode} Response data:`, data);
                 
-                // 检查是否有错误
+                // Log full response for debugging
                 if (data.error) {
-                    console.error(`模式 ${mode} API错误:`, data.error);
+                    console.error(`Mode ${mode} API error:`, data.error);
                     lastError = data.error;
                     
-                    // 特殊处理超长距离错误
+                    // Special handling for distance limit errors
                     if (data.error.code === 'InvalidInput' && 
                         data.error.message.includes('Route exceeds maximum distance limitation')) {
-                        console.log(`模式 ${mode} 因距离限制无法计算路线，继续尝试其他模式`);
+                        console.log(`Mode ${mode} Unable to calculate route due to distance limit, continue to try other modes`);
                         continue;
                     }
                     
-                    continue; // 尝试下一种模式
+                    continue; // Try next mode
                 }
                 
                 if (data.routes && data.routes.length > 0) {
@@ -493,10 +494,10 @@ const calculateRoute = async () => {
                     routeInfo.value = {
                         distance: (route.distance / 1000).toFixed(1),
                         duration: Math.round(route.duration / 60),
-                        mode: mode // 记录使用的交通模式
+                        mode: mode // Record the mode of transportation used
                     };
                     
-                    console.log(`找到路线 (${mode}):`, routeInfo.value);
+                    console.log(`Find route (${mode}):`, routeInfo.value);
                     
                     // Add route to map
                     if (map.value.getSource('route')) {
@@ -531,23 +532,23 @@ const calculateRoute = async () => {
                         });
                     }
                     
-                    // 自动缩放地图以显示完整路线
+                    // Zoom map to fit the entire route
                     const coordinates = route.geometry.coordinates;
                     if (coordinates && coordinates.length > 0) {
-                        // 创建边界框
+                        // Create a bounding box to fit the route
                         let bounds = new (window as any).mapboxgl.LngLatBounds();
                         
-                        // 添加所有路线点到边界框
+                        // Extend bounds with all route coordinates
                         coordinates.forEach((coord: [number, number]) => {
                             bounds.extend(coord);
                         });
                         
-                        // 添加起点和终点作为额外保障
+                        // Also extend bounds with start and end points to ensure they are included
                         bounds.extend(startCoordinates.value);
                         bounds.extend(endCoordinates.value);
                         
-                        // 调整地图视图以适应边界框，添加padding以确保路线不被UI遮挡
-                        // 加快地图移动速度，将duration从1000毫秒改为300毫秒
+        
+                        // Fit the map to the bounds with padding and animation
                         map.value.fitBounds(bounds, {
                             padding: 50,
                             animate: true,
@@ -558,48 +559,48 @@ const calculateRoute = async () => {
                     }
                     
                     routeFound = true;
-                    break; // 找到路线后跳出循环
+                    break; // Route found, exit loop
                 } else {
-                    console.log(`模式 ${mode} 未找到路线`);
+                    console.log(`No route found for mode ${mode}`);
                 }
             } catch (modeError) {
-                console.error(`模式 ${mode} 计算错误:`, modeError);
+                console.error(`Mode ${mode} was evaluated incorrectly:`, modeError);
                 lastError = modeError;
             }
         }
         
         if (!routeFound) {
-            console.log('所有交通模式均未找到路线');
+            console.log('No route found for all modes of transportation');
             
-            // 构建更友好的错误提示
+            // Construct user-friendly error message
             let errorMessage = '';
             
             if (lastError && lastError.code === 'InvalidInput' && 
                 lastError.message && lastError.message.includes('Route exceeds maximum distance limitation')) {
-                // 特殊处理超长距离错误
-                errorMessage = `两地距离过远（直线距离约${straightLineDistance.toFixed(0)}公里），超出了地图服务的路线计算限制。\n建议：\n1. 尝试添加中途点分段规划路线\n2. 选择驾驶模式而非步行或骑行模式\n3. 缩短规划的路线距离`;
+                // Distance limit error
+                errorMessage = `The distance between the two locations is too far (approximately ${straightLineDistance.toFixed(0)} kilometers in a straight line), exceeding the route calculation limit of the map service. \nSuggestions:\n1. Try adding waypoints to split the route\n2. Choose driving mode instead of walking or cycling mode\n3. Shorten the planned route distance`;
             } else if (lastError) {
-                errorMessage = `未找到路线，错误信息: ${lastError.message || lastError}`;
+                errorMessage = `Route not found, error message: ${lastError.message || lastError}`;
             } else {
-                errorMessage = '未找到路线，请尝试其他起点和终点';
+                errorMessage = 'Route not found, please try another starting point and end point';
             }
             
             alert(errorMessage);
             
-            // 即使没有找到路线，也在地图上显示起点和终点的直线连接
-            if (straightLineDistance <= 5000) { // 仅当距离不超过5000公里时显示
+            // If no route is found, show straight line connection if distance is reasonable
+            if (straightLineDistance <= 5000) { // Only show if within 5000 km
                 showStraightLineConnection();
             }
         }
     } catch (error) {
-        console.error('路线计算总错误:', error);
-        alert(`路线计算失败: ${error.message || '请稍后重试'}`);
+        console.error('Total route calculation error:', error);
+        alert(`Route calculation failed: ${error.message || 'Please try again later'}`);
     }
 };
 
-// 计算两点之间的直线距离（公里）
+// Calculate straight-line distance between two coordinates using Haversine formula
 const calculateStraightLineDistance = (coords1: [number, number], coords2: [number, number]): number => {
-    const R = 6371; // 地球半径（公里）
+    const R = 6371; // Earth radius in kilometers
     const dLat = (coords2[1] - coords1[1]) * Math.PI / 180;
     const dLon = (coords2[0] - coords1[0]) * Math.PI / 180;
     
@@ -609,18 +610,18 @@ const calculateStraightLineDistance = (coords1: [number, number], coords2: [numb
         Math.sin(dLon/2) * Math.sin(dLon/2);
     
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const distance = R * c; // 距离（公里）
+    const distance = R * c; // Distance in kilometers
     
     return distance;
 };
 
-// 在地图上显示起点和终点的直线连接
+// Show straight line connection between start and end points
 const showStraightLineConnection = () => {
     if (!startCoordinates.value || !endCoordinates.value || !map.value) return;
     
-    console.log('显示起点和终点的直线连接');
+    console.log('Shows a straight line connecting the start and end points');
     
-    // 创建直线连接的GeoJSON数据
+    // Create GeoJSON line data
     const lineData = {
         type: 'Feature',
         properties: {},
@@ -630,7 +631,7 @@ const showStraightLineConnection = () => {
         }
     };
     
-    // 添加或更新直线连接到地图
+    // Add or update the straight line layer
     if (map.value.getSource('straight-line')) {
         (map.value.getSource('straight-line') as any).setData(lineData);
     } else {
@@ -651,12 +652,12 @@ const showStraightLineConnection = () => {
                 'line-color': '#6B7280',
                 'line-width': 3,
                 'line-opacity': 0.5,
-                'line-dasharray': [5, 5] // 虚线样式
+                'line-dasharray': [5, 5] // Dashed line
             }
         });
     }
     
-    // 缩放地图以显示直线连接
+    // Zoom map to fit the straight line
     const bounds = new (window as any).mapboxgl.LngLatBounds();
     bounds.extend(startCoordinates.value);
     bounds.extend(endCoordinates.value);

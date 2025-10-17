@@ -170,7 +170,7 @@
                                       </div>
                                        
                                         <div>
-                                            <!-- 只显示当前用户创建的评论的删除按钮 -->
+                                            <!-- Delete button, only for own comments -->
                                             <button
                                                 v-if="comment.email === currentUserEmail"
                                                 @click="confirmDelete(comment.id)"
@@ -212,7 +212,7 @@
   const toast = useToast();
   const confirm = useConfirm();
 
-  // ---------------------- Firestore 配置 ----------------------
+  // ------------------- 1. Firestore reference ----------------------
   const commentsDocRef = doc(db, 'comments', 'data');
   
   // ---------------------- 2. User login state ----------------------
@@ -227,7 +227,7 @@
     return userInfo?.displayName  || userInfo?.email || 'Guest';
   });
   
-  // 获取当前用户的email
+  // Get current user email for comment ownership check
   const currentUserEmail = computed(() => {
     const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
     return userInfo?.email || '';
@@ -294,7 +294,7 @@
     email: string;
   }
   
-  //Responsive data
+  // Responsive data
   const newCommentContent = ref(''); 
   const comments = ref<CommentType[]>([]); 
   const isCommentLoading = ref(false); 
@@ -303,7 +303,7 @@
   const submitError = ref('');  
   const RatingVal = ref(null);  
   
-  // 从 Firestore 读取当前资源的评论
+  // Fetch comments from Firestore for the current resource
   const fetchComments = async () => {
     isCommentLoading.value = true;
     commentError.value = '';
@@ -320,7 +320,7 @@
     }
   };
   
-  // 向 Firestore 提交新评论
+  // Submit a new comment
   const submitComment = async () => {
     const content = newCommentContent.value.trim();
     if (!content || RatingVal.value == null) return;
@@ -355,7 +355,7 @@
     }
   };
   
-  //Format comment time
+  // Format comment time
   const formatCommentTime = (timestamp: number) => {
     const now = Date.now();
     const diff = now - timestamp;
@@ -413,7 +413,7 @@
 
     const deleteComment = async (commentId) => {
       try {
-        // 本地二次校验：仅允许删除自己发布的评论
+        // Check if the comment exists and belongs to the current user
         const target = comments.value.find(c => c && c.id === commentId);
         if (!target) {
           toast.add({ severity: 'info', summary: 'Tips', detail: 'Comment not found', life: 3000 });
@@ -424,7 +424,7 @@
           return;
         }
 
-        // Firestore 删除：读-改-写当前资源的评论数组
+        // Delete from Firestore
         const snap = await getDoc(commentsDocRef);
         const data = snap.exists() ? (snap.data() as Record<string, CommentType[]>) : {};
         const key = String(resourceIndex.value);
@@ -432,7 +432,7 @@
         const newArr = arr.filter(c => c && c.id !== commentId);
         await setDoc(commentsDocRef, { [key]: newArr }, { merge: true });
 
-        // 本地状态同步
+        // Update local state
         comments.value = comments.value.filter(comment => comment.id !== commentId);
         toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Comment deleted successfully', life: 3000 });
       } catch (error) {
@@ -441,7 +441,7 @@
       }
     };
 
-  //Initial loading 
+  // Initial loading 
   onMounted(async () => {
     await loadProductData();
     await fetchComments();

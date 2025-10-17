@@ -3,7 +3,7 @@ import { auth } from '@/common/firebase';
 
 export default {
   install: () => {
-    // 防止重复注册监听器
+    // Prevent multiple registrations
     if (window.__authStateListenerRegistered) return;
     window.__authStateListenerRegistered = true;
 
