@@ -2,7 +2,7 @@
  * @Author: zengsheng 12181283
  * @Date: 2025-09-15 09:07:20
  * @LastEditors: zengsheng 12181283
- * @LastEditTime: 2025-10-17 13:49:05
+ * @LastEditTime: 2025-10-17 15:34:12
  * @FilePath: \health-web\src\router\index.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -37,6 +37,11 @@ const router = createRouter({
                     path: '/recipes',
                     name: 'Recipes',
                     component: () => import('@/views/Recipes.vue')
+                },
+                {
+                    path: '/aboutus',
+                    name: 'Aboutus',
+                    component: () => import('@/views/Aboutus.vue')
                 },
             ]
         },

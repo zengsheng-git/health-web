@@ -1,0 +1,29 @@
+{
+  "name": "health-platform-email-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "email-api.js",
+  "scripts": {
+    "start": "node email-api.js",
+    "dev": "nodemon email-api.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.7",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "email",
+    "api",
+    "health",
+    "nutrition",
+    "contact-form"
+  ],
+  "author": "健康营养教育平台",
+  "license": "MIT"
+}
