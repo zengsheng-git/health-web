@@ -3,20 +3,13 @@
     <template #content>
       <div>
         <Toolbar class="mb-6">
-          <template #start>
-            <Button
-              label="Refresh"
-              icon="pi pi-refresh"
-              class="mr-2"
-              @click="loadUsers"
-            />
-          </template>
+          
 
           <template #end>
             <Button
               label="Export"
               icon="pi pi-upload"
-              severity="secondary"
+              severity="danger"
               @click="exportCSV($event)"
             />
           </template>

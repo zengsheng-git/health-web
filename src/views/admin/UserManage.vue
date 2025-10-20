@@ -16,7 +16,7 @@
             <Button
               label="Export"
               icon="pi pi-upload"
-              severity="secondary"
+              severity="danger"
               @click="exportCSV($event)"
             />
           </template>
@@ -51,12 +51,7 @@
             </div>
           </template>
 
-          <Column
-            field="uid"
-            header="User ID"
-            sortable
-            style="min-width: 12rem"
-          ></Column>
+        
           <Column
             field="email"
             header="Email"
@@ -69,19 +64,7 @@
             sortable
             style="min-width: 12rem"
           ></Column>
-          <Column
-            field="emailVerified"
-            header="Email verification"
-            sortable
-            style="min-width: 10rem"
-          >
-            <template #body="slotProps">
-              <Tag
-                :value="slotProps.data.emailVerified ? 'Verified' : 'Not verified'"
-                :severity="slotProps.data.emailVerified ? 'success' : 'warning'"
-              />
-            </template>
-          </Column>
+         
           <Column
             field="disabled"
             header="State"
@@ -150,12 +133,7 @@ const loadUsers = async () => {
       formattedLastSignInTime: formatDate(user.metadata?.lastSignInTime)
     }));
     
-    toast.add({
-      severity: "Success",
-      summary: "Success",
-      detail: `Loaded ${users.value.length} users`,
-      life: 3000,
-    });
+
   } catch (error) {
     console.error("Failed to obtain user data:", error);
     toast.add({
@@ -218,15 +196,14 @@ const exportCSV = () => {
   const csvContent = [];
   
   // Add header
-  csvContent.push(['User ID', 'Email', 'Name', 'Email Verification', 'Status', 'Creation Time', 'Last Login Time'].join(','));
+  csvContent.push(['Email', 'Name', 'Status', 'Creation Time', 'Last Login Time'].join(','));
   
   // Add user data
   users.value.forEach(user => {
     csvContent.push([
-      user.uid,
+     
       `"${user.email}"`,
       `"${user.displayName || '-'}"`,
-      user.emailVerified ? 'Verified' : 'Unverified',
       user.disabled ? 'Disable' : 'Enable',
       `"${user.formattedCreationTime}"`,
       `"${user.formattedLastSignInTime}"`

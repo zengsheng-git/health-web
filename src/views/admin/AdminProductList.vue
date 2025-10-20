@@ -71,7 +71,7 @@ import { doc, getDoc } from 'firebase/firestore';
       }));
       console.log(productList.value);
 
-      // 从 Firestore 读取所有评论映射，计算各产品平均评分
+      // Compute average ratings from Firestore
       try {
         const snap = await getDoc(doc(db, 'comments', 'data'));
         const dataMap = snap.exists() ? (snap.data() || {}) : {};

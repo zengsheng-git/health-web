@@ -33,24 +33,7 @@
                             <span>User management</span>
                         </router-link >
                     </li>
-                    <li>
-                        <a 
-                            href="#" 
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition-colors cursor-not-allowed"
-                        >
-                            <i class="fas fa-chart-line"></i>
-                            <span>Statistical analysis</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a 
-                            href="#" 
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition-colors cursor-not-allowed"
-                        >
-                            <i class="fas fa-cog"></i>
-                            <span>System settings</span>
-                        </a>
-                    </li>
+                    
                 </ul>
             </nav>
         </aside>
@@ -63,7 +46,7 @@
                     <Button :as="RouterLink" to="/PublicHealth" label="Home"></Button>
                     <span class="text-gray-700">{{ userName }}</span>
                     <button @click="handleLogout" class="text-gray-600 hover:text-gray-900 transition-colors">
-                        handleLogout
+                        Logout
                     </button>
                 </div>
             </header>

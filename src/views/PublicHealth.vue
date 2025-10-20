@@ -107,7 +107,7 @@ onMounted(async ()=>{
   homeInfo.value =data;
   console.log(data)
 
-  // 从 Firestore 读取所有评论映射，计算各资源平均评分
+  // Compute average ratings from Firestore
   try {
     const snap = await getDoc(doc(db, 'comments', 'data'));
     const allMap = snap.exists() ? (snap.data() as Record<string, Array<{ RatingVal: number }>>) : {};
